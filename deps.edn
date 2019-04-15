@@ -1,0 +1,5 @@
+{:deps
+ {cli-matic
+  {:git/url "https://github.com/l3nz/cli-matic.git"
+   :sha "23e52bbcc14695bc74bff73bc07624d119004694"}}}
+
