@@ -6,7 +6,7 @@
             [byte-streams :as bs]
             [manifold.stream :as strm]
             [manifold.deferred :as d]
-            [io.aviso.ansi :refer [bold-red-font bold-yellow-font reset-font]]
+            [io.aviso.ansi :refer [bold-red-font bold-yellow-font bold-red yellow-font blue-font reset-font]]
             [clojure.java.jdbc :as j]
             [clojure.string :as str]
             [fipp.edn :refer [pprint] :rename {pprint fipp}]
@@ -180,7 +180,11 @@
 
 (defn print-db []
   (for [[k v ] @db]
-    (println (str (bold-yellow-font k) " handled: " (:callshandled v) " updated:" (:enddatetime v)))
+    (println (str yellow-font k  " --> "
+                  blue-font (:callshandled v)
+                  ", agents-avail: " (:availableagents v)
+                  ", updated:" (:enddatetime v)
+                  reset-font "."))
     ))
 
 (def CONFIGURATION
