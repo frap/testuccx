@@ -22,7 +22,9 @@
            (java.sql SQLException))
   (:gen-class))
 
+
 (def is-master "Master>true")
+(def db (atom {}))
 
 (defn uccx-dbspec
   "Create a UCCX poll system"
@@ -172,7 +174,14 @@
     )
   )
 
+(def testconn {:uccxip "9.1.1.62" :uccxname "atea-dev-uccx11" :wallpwd "ateasystems0916" :query "select * from rtcsqssummary"})
+(defn update-db []
+  (reset! db (make-queues-map (get-wbquery testconn ) )))
 
+(defn print-db []
+  (for [[k v ] @db]
+    (println (str (bold-yellow-font k) " handled: " (:callshandled v) " updated:" (:enddatetime v)))
+    ))
 
 (def CONFIGURATION
   {:app         {:command     "testuccx"
