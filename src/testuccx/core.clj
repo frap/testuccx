@@ -65,6 +65,20 @@
     (let [rows (j/query conn q)]
       rows)))
 
+(defn update-vals [m f & args]
+  (into {} (for [[k v] m] [k (apply f v args)])))
+
+(defn update-vals-reduce [m f & args]
+        (reduce (fn [acc [k v]] (assoc acc k (apply f v args))) {} m))
+
+(defn make-queues-map [ query ]
+  (reduce (fn [emptymap {:keys [csqname] :as row}]
+            (update-in emptymap
+                       [csqname]
+                       (fnil conj {})
+                       (dissoc row :csqname)))
+          {} query) )
+
 (defn check-master-uccx
   "Checks if the IP given is the UCCX DB master.
    returns boolean"
@@ -77,7 +91,9 @@
     )
   )
 
-
+(with-finally! #'check-master-uccx
+  "An optional docstring about the finally function."
+  (fn [& args] (println bold-red-font "Executing a finally clause." args reset-font)))
 
 ;;; For a task, specify an exception that can be raised and a function to deal with it.
 (with-handler! #'run-query!
@@ -90,10 +106,6 @@
                    (println bold-red-font "UCCX SQL syntax is incorrect - errmsg: " message reset-font)
 
     )))
-
-(with-finally! #'check-master-uccx
-  "An optional docstring about the finally function."
-  (fn [& args] (println bold-red-font "Executing a finally clause." args reset-font)))
 
 (defn process-response
 
@@ -110,8 +122,6 @@
 (defn entity [ip]
   (p/then (http/get (ip->url ip) {:timeout 1})
           process-response))
-
-
 
 (defn check-master
   "polls Uccx IP and determines master"
@@ -132,6 +142,7 @@
 
                    )))
 
+
 (defn get-rtstats
   "Collect real time stats from UCCX"
   [{:keys [uccxip uccxname wallpwd]}]
@@ -144,6 +155,19 @@
           )
       (println bold-yellow-font uccxip " is not master! Can't run query" reset-font)
 
+      )
+    )
+  )
+
+(defn get-wbquery
+  "Collect real time stats from UCCX"
+  [{:keys [uccxip uccxname wallpwd query]}]
+  (let [is-master? (:is-master? (check-master {:uccxip uccxip}))
+        ds    (uccx-dbspec uccxip uccxname wallpwd)
+        query (str query)]
+    (if is-master?
+      (run-query! ds query)
+      (println bold-yellow-font uccxip " is not master! Can't run query" reset-font)
       )
     )
   )
