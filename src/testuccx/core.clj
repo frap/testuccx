@@ -15,7 +15,8 @@
                      alts! alts!! timeout]]
             [hikari-cp.core :as h]
             [dire.core :refer [with-handler! with-finally!]]
-            [mount.core :refer [defstate]]
+            [lanterna.screen :as scr]
+            [clojure.pprint :refer [cl-format]]
             )
   (:import (java.net ConnectException ServerSocket SocketTimeoutException SocketException URI)
            (com.informix.asf IfxASFRemoteException Connection)
@@ -171,8 +172,7 @@
       (run-query! ds query)
       (println bold-yellow-font uccxip " is not master! Can't run query" reset-font)
       )
-    )
-  )
+    ))
 
 (def testconn {:uccxip "9.1.1.62" :uccxname "atea-dev-uccx11" :wallpwd "ateasystems0916" :query "select * from rtcsqssummary"})
 (defn update-db []
@@ -182,6 +182,54 @@
   (for [[k v ] @db]
     (println (str (bold-yellow-font k) " handled: " (:callshandled v) " updated:" (:enddatetime v)))
     ))
+
+  (defn leftpad
+  "If S is shorter than LEN, pad it with CH on the left."
+  ([s len] (leftpad s len " "))
+  ([s len ch]
+   (cl-format nil (str "~" len ",'" ch "d") (str s))))
+
+  (def screen-cols {:availableagents 20 :callshandled 35 :callsabandoned 50})
+
+  (defn setup-screen []
+    (def screen (scr/get-screen :swing))
+    (scr/start screen)
+    (scr/put-string screen 0 0 " Q name" {:fg :black :bg :yellow})
+    (scr/put-string screen (:availableagents screen-cols) 0 "Avl agents" {:fg :green})
+    (scr/put-string screen (:callshandled screen-cols) 0 "Hndled calls" {:fg :blue})
+    (scr/put-string screen (:callsabandoned screen-cols) 0 "Abned calls" {:fg :red})
+    (scr/redraw screen)
+    )
+
+(defn screen-update-rows [db]
+  (let rows  (range (count (deref db)))
+        )
+  (for [[q data] (deref db)]
+    (doseq ()))
+  )
+
+
+(comment
+  (def testdata [{:csqname "Dev"   :availableagents 7  :callshandled 12 :callsabandoned 7}
+                 {:csqname "Sales" :availableagents 15 :callshandled 50 :callsabandoned 42}])
+  (defn reduce-map [data]
+    (reduce (fn [emptymap {:keys [csqname] :as row}]
+              (update-in emptymap
+                         [csqname]
+                         (fnil conj {})
+                         (dissoc row :csqname)))
+            {} data ))
+
+  (defn map-keys-map
+    [m ks f]
+     (merge m
+       (into {}
+         (for [k ks] [k (f (k m))]))))
+  (defn map-values-red
+    [m keys f & args]
+    (reduce #(apply update-in %1 [%2] f args) m keys))
+  (map-values m [:a :b] inc)
+  )
 
 (def CONFIGURATION
   {:app         {:command     "testuccx"

@@ -17,7 +17,7 @@
                  [org.clojure/core.async "0.4.490"]
                  [org.clojure/java.jdbc "0.7.0"]
                  [hikari-cp "2.7.1"]
-                 [mount "0.1.16"]
+                 [clojure-lanterna "0.9.7"]
                  [dire "0.5.4"]
                  ]
    :repl-options {:init-ns testuccx.core}
