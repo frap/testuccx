@@ -19,6 +19,7 @@
                  [hikari-cp "2.7.1"]
                  [clojure-lanterna "0.9.7"]
                  [dire "0.5.4"]
+                 [tick "0.4.12-alpha"]
                  ]
    :repl-options {:init-ns testuccx.core}
    :main testuccx.core

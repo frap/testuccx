@@ -17,10 +17,13 @@
             [dire.core :refer [with-handler! with-finally!]]
             [lanterna.screen :as scr]
             [clojure.pprint :refer [cl-format]]
+            [tick.alpha.api :as t]
+            [tick.deprecated.schedule :as tick :refer [schedule]]
             )
-  (:import (java.net ConnectException ServerSocket SocketTimeoutException SocketException URI)
-           (com.informix.asf IfxASFRemoteException Connection)
-           (java.sql SQLException))
+  (:import [java.net ConnectException ServerSocket SocketTimeoutException SocketException URI]
+           [com.informix.asf IfxASFRemoteException Connection]
+           [java.sql SQLException]
+           [java.time DayOfWeek])
   (:gen-class))
 
 
@@ -187,31 +190,49 @@
                   reset-font "."))
     ))
 
-  (defn leftpad
+(defn leftpad
   "If S is shorter than LEN, pad it with CH on the left."
   ([s len] (leftpad s len " "))
   ([s len ch]
    (cl-format nil (str "~" len ",'" ch "d") (str s))))
 
-  (def screen-cols {:availableagents 20 :callshandled 35 :callsabandoned 50})
+(def screen-cols {:csqname 1
+                  :callshandled 10
+                  :callswaiting 18
+                  :callsabandoned 26
+                  :avgtalkduration 34
+                  :avgwaitduration 42
+                  :totalcalls 50
+                  :availableagents 58
+                  :talkingagents 68
+                  :enddatetime 74})
 
-  (defn setup-screen []
-    (def screen (scr/get-screen :swing))
-    (scr/start screen)
-    (scr/put-string screen 0 0 " Q name" {:fg :black :bg :yellow})
-    (scr/put-string screen (:availableagents screen-cols) 0 "Avl agents" {:fg :green})
-    (scr/put-string screen (:callshandled screen-cols) 0 "Hndled calls" {:fg :blue})
-    (scr/put-string screen (:callsabandoned screen-cols) 0 "Abned calls" {:fg :red})
-    (scr/redraw screen)
-    )
+(def screen (scr/get-screen :swing))
 
-(defn screen-update-rows [db]
-  (let rows  (range (count (deref db)))
-        )
-  (for [[q data] (deref db)]
-    (doseq ()))
+(defn print-header [resource-kw colname fg-colour]
+  (scr/put-string screen (resource-kw screen-cols) 0 (leftpad colname 6) {:fg fg-colour} ))
+
+(defn print-resource [resource-kw line-num row]
+  (scr/put-string screen (resource-kw screen-cols)
+                  line-num (leftpad (resource-kw row) 5) {:fg :white}))
+
+(defn setup-screen []
+  (scr/clear screen)
+  (scr/start screen)
+  (scr/put-string screen 1 0 "Queue" {:fg :black :bg :yellow})
+  (print-header :callshandled "Hndled" :white)
+  (print-header :callswaiting "Waiting" :yellow)
+  (print-header :callsabandoned "Abned" :red)
+  (print-header :avgtalkduration "AvgTalk" :white)
+  (print-header :avgwaitduration "AvgWait" :yellow)
+  (print-header :totalcalls "Total" :white)
+  (print-header :availableagents "AvlAgts" :green)
+  (print-header :talkingagents "TalkAgts" :yellow)
+  (scr/redraw screen)
   )
 
+(defn print-resources [ db ]
+  )
 
 (comment
   (def testdata [{:csqname "Dev"   :availableagents 7  :callshandled 12 :callsabandoned 7}
@@ -224,6 +245,13 @@
                          (dissoc row :csqname)))
             {} data ))
 
+  (defn screen-update-rows [db]
+  (let rows  (range (count (deref db)))
+        )
+  (for [[q data] (deref db)]
+    (doseq ()))
+  )
+;; work on non-nested map
   (defn map-keys-map
     [m ks f]
      (merge m
@@ -232,6 +260,7 @@
   (defn map-values-red
     [m keys f & args]
     (reduce #(apply update-in %1 [%2] f args) m keys))
+
   (map-values m [:a :b] inc)
   )
 
