@@ -6,8 +6,6 @@
   :dependencies [[org.clojure/clojure "1.10.0"]
                  [org.clojure/spec.alpha "0.2.176"]
                  [cli-matic "0.3.6"]
-                 [funcool/promesa "2.0.1"]
-                 [funcool/httpurr "1.1.0"]
                  [aleph "0.4.7-alpha5"]
                  [byte-streams "0.2.5-alpha2"]
                  [manifold "0.1.9-alpha3"]
@@ -20,6 +18,8 @@
                  [clojure-lanterna "0.9.7"]
                  [dire "0.5.4"]
                  [tick "0.4.12-alpha"]
+                 [org.clojure/tools.logging "0.4.1"]
+                 [ch.qos.logback/logback-classic "1.1.3"]
                  ]
    :repl-options {:init-ns testuccx.core}
    :main testuccx.core

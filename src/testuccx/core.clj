@@ -1,8 +1,5 @@
 (ns testuccx.core
   (:require [cli-matic.core :refer [run-cmd]]
-            [httpurr.status :as s]
-            [httpurr.client.aleph :as http]
-            [promesa.core :as p]
             [byte-streams :as bs]
             [manifold.stream :as strm]
             [manifold.deferred :as d]
@@ -57,8 +54,8 @@
                        uccx-name-error (re-find #"DBSERVERNAME" message)
                        passwd-error    (re-find #"password" message) ]
                    (if uccx-name-error
-                     (println  bold-red-font "UCCX Server Name is wrong - errmsg: " message reset-font)
-                     (println  bold-red-font "UCCX password is incorrect - errmsg: " message reset-font)
+                     (println  bold-red-font "¡ Incorrect UCCX Server Name !: " bold-yellow-font message reset-font)
+                     (println  bold-red-font "¡ UCCX password is WRONG !: " bold-yellow-font message reset-font)
                      ))))
 
 (defn run-statement! [ds s]
@@ -113,13 +110,6 @@
 
     )))
 
-(defn process-response
-
-  [response]
-  (condp = (:status response)
-    s/ok           (p/resolved (bs/to-string (:body response)))
-    s/not-found    (p/rejected :not-found (bs/to-string (:head response)))
-    s/unauthorized (p/rejected :unauthorized)))
 
 (defn ip->url
   [ip]
