@@ -156,10 +156,6 @@
     )))
 
 
-
-(defn entity [ip]
-  )
-
 (defn check-master
   "polls Uccx IP and determines master"
   [{:keys [uccxip]}]
@@ -208,9 +204,6 @@
       )
     ))
 
-(def testconn {:uccxip "9.1.1.62" :uccxname "atea-dev-uccx11" :wallpwd "ateasystems0916" :query "select * from rtcsqssummary"})
-(defn update-db []
-  (reset! db (make-queues-map (get-wbquery testconn ) )))
 
 (defn print-db []
   (for [[k v ] @db]
